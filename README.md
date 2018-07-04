@@ -2,6 +2,9 @@
 
 A tool to manage todos
 
+## Status
+[![Build Status](https://travis-ci.org/Willifme/Todo.svg?branch=master)](https://travis-ci.org/Willifme/Todo)
+
 ## Getting Started
 
 Coming Soon
