@@ -30,4 +30,4 @@ See also the list of [contributors](https://github.com/Willifme/Todo/contributor
 
 ## Licence
 
-This project is licenced under the MIT License - see the [LICENCE.md](LICENCE.md) file for details
+This project is licenced under the MIT License - see the [LICENCE](LICENCE) file for details
