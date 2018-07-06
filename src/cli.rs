@@ -2,7 +2,6 @@ use app_dirs::{app_root, AppDataType, AppInfo};
 use config::{Config, File};
 use csv::{Reader, Writer};
 use std::collections::HashMap;
-use std::io;
 use todo::Todo;
 use todos::Todos;
 
@@ -94,7 +93,7 @@ impl CLI {
             .unwrap_or_else(|err| panic!("Error: {}", err))
     }
 
-    fn load_todos(path: &String) -> Todos {
+    fn load_todos(path: &str) -> Todos {
         let mut reader = Reader::from_path(path).unwrap();
 
         let todos_vec = reader
