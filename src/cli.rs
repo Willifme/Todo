@@ -42,6 +42,9 @@ impl CLI {
                 (about: "complete a todo")
                 (@arg todo: -t --todo +takes_value +required "complete a todo when giving the id")
             )
+            (@subcommand complete_all =>
+                (about: "complete all todos")
+            )
         ).get_matches();
 
         self.todos.sort();
@@ -50,6 +53,13 @@ impl CLI {
             Some("show") => println!("{}", self.todos),
             Some("overdue") => println!("{}", self.todos.overdue()),
             Some("soon") => println!("{}", self.todos.soon()),
+            Some("complete_all") => {
+                println!("Completed: \n{}", self.todos);
+
+                self.todos.complete_all();
+
+                self.write_todos();
+            }
             _ => {}
         };
 
