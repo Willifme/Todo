@@ -1,19 +1,26 @@
+use std::io;
 use app_dirs::{app_root, AppDataType, AppInfo};
 use config::{Config, File};
-use csv::Reader;
+use csv::{Reader, Writer};
 use std::collections::HashMap;
 use todo::Todo;
 use todos::Todos;
 
-#[derive(Default, Clone)]
+#[derive(Default)]
 pub struct CLI {
+    #[allow(dead_code)]
     config: HashMap<String, String>,
+
+    todos: Todos,
 }
 
 impl CLI {
     pub fn new() -> CLI {
+        let config = CLI::load_config();
+
         CLI {
-            config: HashMap::new(),
+            todos: CLI::load_todos(&config["todos-path"]),
+            config: config,
         }
     }
 
@@ -23,30 +30,45 @@ impl CLI {
             (version: crate_version!())
             (author: crate_authors!("\n"))
             (about: crate_description!())
+            (@subcommand show =>
+                (about: "show the current todos")
+            )
             (@subcommand overdue =>
                 (about: "shows overdue todos")
             )
             (@subcommand soon =>
                 (about: "shows todos which are due soon")
             )
+            (@subcommand complete =>
+                (about: "complete a todo")
+                (@arg todo: -t --todo +takes_value +required "complete a todo when giving the id")
+            )
         ).get_matches();
 
+        self.todos.sort();        
+
         match matches.subcommand_name() {
-            Some("overdue") => {
-                self.load_config();
-
-                println!("{}", self.load_todos().overdue());
-            }
-            Some("soon") => {
-                self.load_config();
-
-                println!("{}", self.load_todos().soon());
-            }
+            Some("show") => println!("{}", self.todos),
+            Some("overdue") => println!("{}", self.todos.overdue()),
+            Some("soon") => println!("{}", self.todos.soon()),
             _ => {}
         };
+
+        if let Some(complete) = matches.subcommand_matches("complete") {
+            if complete.is_present("todo") {
+                let todo_id = value_t!(complete.value_of("todo"), usize)
+                    .unwrap_or_else(|err| panic!("Error: {}", err));
+
+                self.todos.0[todo_id].completed = true;
+
+                println!("Completed: \n{}", self.todos.0[todo_id]);
+
+                self.write_todos();
+            }
+        }
     }
 
-    fn load_config(&mut self) {
+    fn load_config() -> HashMap<String, String> {
         // Use Willifme to keep the path short
         let app_info = AppInfo {
             name: "todo",
@@ -67,13 +89,13 @@ impl CLI {
             .merge(File::with_name(app_dir.to_str().unwrap()))
             .unwrap();
 
-        self.config = settings
+        settings
             .try_into::<HashMap<String, String>>()
-            .unwrap_or_else(|err| panic!("Error: {}", err));
+            .unwrap_or_else(|err| panic!("Error: {}", err))
     }
 
-    fn load_todos(&self) -> Todos {
-        let mut reader = Reader::from_path(&*self.config["todos-path"]).unwrap();
+    fn load_todos(path: &String) -> Todos {
+        let mut reader = Reader::from_path(path).unwrap();
 
         let todos_vec = reader
             .deserialize()
@@ -81,5 +103,16 @@ impl CLI {
             .collect::<Vec<Todo>>();
 
         Todos::new(todos_vec)
+    }
+
+    fn write_todos(&self) {
+        let mut writer = Writer::from_path(&*self.config["todos-path"])
+            .unwrap_or_else(|err| panic!("Error: {}", err));
+
+        // Writing the todos struct does not serialise correctly, so do each individually
+        self.todos.0.clone().into_iter()
+            .for_each(|todo| writer.serialize(todo).unwrap_or_else(|err| panic!("Error: {}", err)));
+
+        writer.flush();
     }
 }

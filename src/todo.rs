@@ -4,7 +4,7 @@ use chrono::{DateTime, Local};
 use std::cmp::{Ord, Ordering};
 use std::fmt;
 
-#[derive(Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Deserialize, Serialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Priority {
     High,
     Middle,
@@ -23,7 +23,7 @@ impl fmt::Display for Priority {
     }
 }
 
-#[derive(Deserialize, Clone, Debug, Eq, PartialEq, PartialOrd)]
+#[derive(Deserialize, Serialize, Clone, Debug, Eq, PartialEq, PartialOrd)]
 #[serde(rename_all = "PascalCase")]
 pub struct Todo {
     pub priority: Priority,
