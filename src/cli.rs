@@ -40,7 +40,7 @@ impl CLI {
             )
             (@subcommand complete =>
                 (about: "complete a todo")
-                (@arg todo: -t --todo +takes_value +required "complete a todo when giving the id")
+                (@arg todo: -t --todo +takes_value +required +multiple "complete a todo when giving the id")
             )
             (@subcommand complete_all =>
                 (about: "complete all todos")
@@ -65,12 +65,18 @@ impl CLI {
 
         if let Some(complete) = matches.subcommand_matches("complete") {
             if complete.is_present("todo") {
-                let todo_id = value_t!(complete.value_of("todo"), usize)
+                let todo_ids = values_t!(complete.values_of("todo"), usize)
                     .unwrap_or_else(|err| panic!("Error: {}", err));
 
-                self.todos.0[todo_id].completed = true;
+                println!("Completed: ");
 
-                println!("Completed: \n{}", self.todos.0[todo_id]);
+                todo_ids
+                    .into_iter()
+                    .for_each(|todo_id| {
+                        self.todos.0[todo_id].completed = true;
+
+                        println!("{}", self.todos.0[todo_id]);
+                    }); 
 
                 self.write_todos();
             }
