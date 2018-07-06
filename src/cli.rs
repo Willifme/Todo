@@ -70,13 +70,11 @@ impl CLI {
 
                 println!("Completed: ");
 
-                todo_ids
-                    .into_iter()
-                    .for_each(|todo_id| {
-                        self.todos.0[todo_id].completed = true;
+                todo_ids.into_iter().for_each(|todo_id| {
+                    self.todos.0[todo_id].completed = true;
 
-                        println!("{}", self.todos.0[todo_id]);
-                    }); 
+                    println!("{}", self.todos.0[todo_id]);
+                });
 
                 self.write_todos();
             }
