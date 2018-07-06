@@ -2,8 +2,8 @@ use chrono::Local;
 use std::fmt;
 use todo::Todo;
 
-#[derive(Deserialize)]
-pub struct Todos(Vec<Todo>);
+#[derive(Deserialize, Serialize, Default)]
+pub struct Todos(pub Vec<Todo>);
 
 impl Todos {
     pub fn new(todos: Vec<Todo>) -> Todos {
@@ -14,10 +14,7 @@ impl Todos {
         self.0.sort_by(|l, r| l.cmp(r));
     }
 
-    pub fn overdue(&mut self) -> Todos {
-        // Sort first
-        self.sort();
-
+    pub fn overdue(&self) -> Todos {
         let todos = self.0
             .iter()
             .cloned()
@@ -28,10 +25,7 @@ impl Todos {
         Todos(todos)
     }
 
-    pub fn soon(&mut self) -> Todos {
-        // Sort first
-        self.sort();
-
+    pub fn soon(&self) -> Todos {
         let todos = self.0
             .iter()
             .cloned()
