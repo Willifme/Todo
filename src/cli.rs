@@ -1,8 +1,8 @@
-use std::io;
 use app_dirs::{app_root, AppDataType, AppInfo};
 use config::{Config, File};
 use csv::{Reader, Writer};
 use std::collections::HashMap;
+use std::io;
 use todo::Todo;
 use todos::Todos;
 
@@ -45,7 +45,7 @@ impl CLI {
             )
         ).get_matches();
 
-        self.todos.sort();        
+        self.todos.sort();
 
         match matches.subcommand_name() {
             Some("show") => println!("{}", self.todos),
@@ -110,8 +110,11 @@ impl CLI {
             .unwrap_or_else(|err| panic!("Error: {}", err));
 
         // Writing the todos struct does not serialise correctly, so do each individually
-        self.todos.0.clone().into_iter()
-            .for_each(|todo| writer.serialize(todo).unwrap_or_else(|err| panic!("Error: {}", err)));
+        self.todos.0.clone().into_iter().for_each(|todo| {
+            writer
+                .serialize(todo)
+                .unwrap_or_else(|err| panic!("Error: {}", err))
+        });
 
         writer.flush();
     }
